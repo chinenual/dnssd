@@ -136,9 +136,10 @@ func probeAtInterface(ctx context.Context, conn MDNSConn, service Service, iface
 		Qclass: dns.ClassINET,
 	}
 
-	// Responses to probe should be unicast
-	setQuestionUnicast(&instanceQ)
-	setQuestionUnicast(&hostQ)
+// Match fix for https://github.com/brutella/dnssd/issues/15 
+//	// Responses to probe should be unicast
+//	setQuestionUnicast(&instanceQ)
+//	setQuestionUnicast(&hostQ)
 
 	msg.Question = []dns.Question{instanceQ, hostQ}
 
@@ -175,7 +176,16 @@ func probeAtInterface(ctx context.Context, conn MDNSConn, service Service, iface
 				case *dns.A:
 					for _, a := range as {
 						if isDenyingA(rr, a) {
+							/*
+							fmt.Printf("DENIES A req: %#v\n",req)
+							if req.from == nil {
+								fmt.Printf("DENIES A req.from NIL\n")
+							}
+							if req.iface == nil {
+								fmt.Printf("DENIES A req.iface NIL\n")
+							}
 							log.Debug.Printf("%v:%d@%s denies A\n", req.from.IP, req.from.Port, req.iface.Name)
+							*/
 							conflict.hostname = true
 							break
 						}
@@ -184,7 +194,16 @@ func probeAtInterface(ctx context.Context, conn MDNSConn, service Service, iface
 				case *dns.AAAA:
 					for _, aaaa := range aaaas {
 						if isDenyingAAAA(rr, aaaa) {
+							/*
+							fmt.Printf("DENIES AAAA req: %#v\n",req)
+							if req.from == nil {
+								fmt.Printf("DENIES AAAA req.from NIL\n")
+							}
+							if req.iface == nil {
+								fmt.Printf("DENIES AAAA req.iface NIL\n")
+							}
 							log.Debug.Printf("%v:%d@%s denies AAAA\n", req.from.IP, req.from.Port, req.iface.Name)
+							*/
 							conflict.hostname = true
 							break
 						}
